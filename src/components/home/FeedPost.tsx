@@ -17,7 +17,7 @@ export const FeedPost = ({
       <Box my={2} borderRadius={4} overflow={"hidden"}>
         <Image src={img} alt={username}/>
       </Box>
-      <PostFooter username={username}/>
+      <PostFooter username={username} isProfilePage={false}/>
     </>
   );
 };
