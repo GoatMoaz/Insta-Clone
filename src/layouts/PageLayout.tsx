@@ -8,7 +8,7 @@ export const PageLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <Flex>
       {/* Sidebar on the left */}
-      {pathname !== "/emailConfirmation" && pathname !== "/" && (
+      {pathname !== "/auth/emailConfirmation" && pathname !== "/" && (
         <Box w={{ base: "70px", md: "240px" }}>
           <Sidebar />
         </Box>
