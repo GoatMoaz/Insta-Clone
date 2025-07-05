@@ -6,7 +6,7 @@ export const Logout = () => {
   return (
     <RouterLink
       display={"flex"}
-      to={"/auth"}
+      to={"/"}
       alignItems={"center"}
       gap={4}
       _hover={{ bg: "whiteAlpha.300" }}

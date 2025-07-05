@@ -19,7 +19,7 @@ export const Sidebar = () => {
     >
       <Flex direction={"column"} gap={10} w={"full"} height={"full"}>
         <RouterLink
-          to="/"
+          to="/home"
           pl={2}
           display={{ base: "none", md: "block" }}
           cursor={"pointer"}
@@ -27,7 +27,7 @@ export const Sidebar = () => {
           <InstagramLogo />
         </RouterLink>
         <RouterLink
-          to="/"
+          to="/home"
           p={2}
           display={{ base: "flex", md: "none" }}
           cursor={"pointer"}

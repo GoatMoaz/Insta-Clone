@@ -12,7 +12,7 @@ export const SuggestedHeader = () => {
         </Text>
       </Flex>
       <RouterLink
-        to={"/auth"}
+        to={"/"}
         fontSize={14}
         p={2}
         fontWeight={"medium"}

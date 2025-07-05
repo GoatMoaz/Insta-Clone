@@ -6,7 +6,7 @@ export const Home = () => {
   return (
     <RouterLink
       display={"flex"}
-      to={"/"}
+      to={"/home"}
       alignItems={"center"}
       gap={4}
       _hover={{ bg: "whiteAlpha.300" }}
