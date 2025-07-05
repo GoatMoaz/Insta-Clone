@@ -24,7 +24,7 @@ export const useAuth = () => {
 
     try {
       const response = await axios.post(
-        "http://insta.runasp.net/api/Auth/login",
+        "https://insta.runasp.net/api/Auth/login",
         data
       );
       setIsLoading(false);
@@ -60,7 +60,7 @@ export const useAuth = () => {
     setError(null);
 
     try {
-      await axios.post("http://insta.runasp.net/api/Auth/register", data);
+      await axios.post("https://insta.runasp.net/api/Auth/register", data);
       setIsLoading(false);
       return {
         success: true,

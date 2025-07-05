@@ -27,7 +27,7 @@ export const useEmailConfirmation = (): UseEmailConfirmationResult => {
 
     try {
       const response = await axios.post(
-        "http://insta.runasp.net/api/Auth/confirm-email",
+        "https://insta.runasp.net/api/Auth/confirm-email",
         {
           username,
           code,
