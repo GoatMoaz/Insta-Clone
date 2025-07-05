@@ -8,13 +8,118 @@ import {
   Flex,
   Text,
 } from "@chakra-ui/react";
+import { useAuth } from "@/hooks/useAuth";
+import { validateAuth } from "@/utils/authValidation";
+import { useNavigate } from "react-router-dom";
+import { AuthVerification } from "./AuthVerification";
+import { AuthSignupFields } from "./AuthSignupFields";
 
 export const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [showVerification, setShowVerification] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [formData, setFormData] = useState({
+    fullName: "",
+    userName: "",
+    email: "",
+    password: "",
+    userNameOrEmail: "",
+    birthDay: "",
+  });
+  const [validationErrors, setValidationErrors] = useState<{
+    [key: string]: string;
+  }>({});
+
+  const { login, register, isLoading, error, setError } = useAuth();
+  const navigate = useNavigate();
 
   const switchHandler = () => {
     setIsLogin((prevState) => !prevState);
+    setError(null);
+    setValidationErrors({});
+    setShowVerification(false);
+    // Reset form data when switching
+    setFormData({
+      fullName: "",
+      userName: "",
+      email: "",
+      password: "",
+      userNameOrEmail: "",
+      birthDay: "",
+    });
   };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+
+    // Clear validation error for this field when user starts typing
+    if (validationErrors[field]) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        [field]: "",
+      }));
+    }
+  };
+
+  const handleSubmit = async () => {
+    // Validate form data
+    const validation = validateAuth(formData, isLogin);
+
+    if (!validation.isValid) {
+      // Convert validation errors to object for easy lookup
+      const errorMap: { [key: string]: string } = {};
+      validation.errors.forEach((error) => {
+        errorMap[error.field] = error.message;
+      });
+      setValidationErrors(errorMap);
+      return;
+    }
+
+    try {
+      if (isLogin) {
+        const response = await login({
+          userNameOrEmail: formData.userNameOrEmail,
+          password: formData.password,
+        });
+
+        if (response.success) {
+          navigate("/home");
+        }
+      } else {
+        const response = await register({
+          fullName: formData.fullName,
+          userName: formData.userName,
+          email: formData.email,
+          password: formData.password,
+          birthDay: formData.birthDay,
+        });
+
+        if (response.success) {
+          setUserEmail(formData.email);
+          setShowVerification(true);
+        }
+      }
+    } catch (err) {
+      console.error("Auth error:", err);
+    }
+  };
+
+  const getInputStyle = (fieldName: string) => ({
+    borderColor: validationErrors[fieldName] ? "red.500" : "gray.300",
+    _focus: {
+      borderColor: validationErrors[fieldName] ? "red.500" : "blue.500",
+    },
+  });
+
+  // Show verification message after successful registration
+  if (showVerification && !isLogin) {
+    return (
+      <AuthVerification userEmail={userEmail} switchHandler={switchHandler} />
+    );
+  }
 
   return (
     <>
@@ -23,17 +128,69 @@ export const AuthForm = () => {
           {/* logo */}
           <Image src="/logo.png" h={24} alt="Instagram" />
 
+          {/* Error message */}
+          {error && (
+            <Text color="red.500" fontSize={12} textAlign="center">
+              {error}
+            </Text>
+          )}
+
           {/* Log in or Sign up */}
-          <Input placeholder="Email" type="email" fontSize={14} />
-          <Input placeholder="Passowrd" type="password" fontSize={14} />
-          {!isLogin && (
-            <Input
-              placeholder="Confirm Password"
-              type="password"
-              fontSize={14}
+          {isLogin ? (
+            <Box w="full">
+              <Input
+                placeholder="Email, or username"
+                type="text"
+                fontSize={14}
+                value={formData.userNameOrEmail}
+                onChange={(e) =>
+                  handleInputChange("userNameOrEmail", e.target.value)
+                }
+                {...getInputStyle("userNameOrEmail")}
+                outline={"none"}
+                id="userNameOrEmail"
+              />
+              {validationErrors.userNameOrEmail && (
+                <Text color="red.500" fontSize={12} mt={1}>
+                  {validationErrors.userNameOrEmail}
+                </Text>
+              )}
+            </Box>
+          ) : (
+            <AuthSignupFields
+              formData={formData}
+              validationErrors={validationErrors}
+              handleInputChange={handleInputChange}
+              getInputStyle={getInputStyle}
             />
           )}
-          <Button w={"full"} colorPalette="blue" size={"sm"} fontSize={14}>
+
+          <Box w="full">
+            <Input
+              placeholder="Password"
+              type="password"
+              fontSize={14}
+              value={formData.password}
+              onChange={(e) => handleInputChange("password", e.target.value)}
+              {...getInputStyle("password")}
+              outline={"none"}
+              id="password"
+            />
+            {validationErrors.password && (
+              <Text color="red.500" fontSize={12} mt={1}>
+                {validationErrors.password}
+              </Text>
+            )}
+          </Box>
+
+          <Button
+            w={"full"}
+            colorPalette="blue"
+            size={"sm"}
+            fontSize={14}
+            onClick={handleSubmit}
+            disabled={isLoading}
+          >
             {isLogin ? "Log in" : "Sign Up"}
           </Button>
 
