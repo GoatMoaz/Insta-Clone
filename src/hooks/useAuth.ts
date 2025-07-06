@@ -85,11 +85,89 @@ export const useAuth = () => {
     }
   };
 
+  const forgetPassword = async (email: string) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await axios.post("https://insta.runasp.net/api/Auth/forget-password", {
+        email,
+      });
+      setIsLoading(false);
+      return {
+        success: true,
+        message: "Password reset link sent to your email",
+      };
+    } catch (err: unknown) {
+      setIsLoading(false);
+      let errorMessage = "An error occurred";
+
+      if (axios.isAxiosError(err)) {
+        errorMessage =
+          err.response?.data?.errors?.[1] ||
+          err.response?.data?.errors?.Email[0] ||
+          "An error occurred";
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
+      return {
+        success: false,
+        message: errorMessage,
+      };
+    }
+  };
+
+  const resetPassword = async (
+    email: string,
+    code: string,
+    newPassword: string
+  ) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await axios.post("https://insta.runasp.net/api/Auth/reset-password", {
+        email,
+        code,
+        newPassword,
+      });
+      setIsLoading(false);
+      return {
+        success: true,
+        message: "Password reset successful",
+      };
+    } catch (err: unknown) {
+      setIsLoading(false);
+      let errorMessage = "An error occurred";
+
+      if (axios.isAxiosError(err)) {
+        errorMessage =
+          err.response?.data?.errors?.[1] ||
+          err.response?.data?.errors?.NewPassword?.[0] ||
+          "An error occurred";
+
+        console.log(errorMessage);
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
+      return {
+        success: false,
+        message: errorMessage,
+      };
+    }
+  };
+
   return {
     login,
     register,
     isLoading,
     error,
     setError,
+    forgetPassword,
+    resetPassword,
   };
 };

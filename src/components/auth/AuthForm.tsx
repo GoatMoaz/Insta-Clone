@@ -182,6 +182,18 @@ export const AuthForm = () => {
               </Text>
             )}
           </Box>
+          {isLogin && (
+            <Flex align={"center"} justify={"flex-start"} w="full" mt={1}>
+              <Text
+                fontSize={12}
+                cursor="pointer"
+                _hover={{ textDecoration: "underline" }}
+                onClick={() => navigate("/auth/reset-password")}
+              >
+                Forget Password?
+              </Text>
+            </Flex>
+          )}
 
           <Button
             w={"full"}
