@@ -1,4 +1,4 @@
-import { Box, VStack, Flex, Input, Button } from "@chakra-ui/react";
+import { Box, VStack, Flex, Input, Button, Text } from "@chakra-ui/react";
 import { FiLock } from "react-icons/fi";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -72,10 +72,20 @@ export const ResetPasswordPage = () => {
               </Button>
             </>
           ) : (
-            <Box fontSize={18} color="green.500">
-              A password reset link has been sent to your email. Please check
-              your inbox and follow the instructions to reset your password.
-            </Box>
+            <>
+              <Text
+                fontSize={18}
+                fontWeight={"semibold"}
+                textAlign={"center"}
+                mb={2}
+              >
+                Password Reset Link Sent
+              </Text>
+              <Text fontSize={14} textAlign={"center"} color="gray.500">
+                A password reset link has been sent to your email. Please check
+                your inbox and follow the instructions to reset your password.
+              </Text>
+            </>
           )}
         </VStack>
       </Box>
