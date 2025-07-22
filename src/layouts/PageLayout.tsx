@@ -9,15 +9,13 @@ export const PageLayout = ({ children }: { children: React.ReactNode }) => {
     <Flex>
       {/* Sidebar on the left */}
       {!pathname.startsWith("/auth") && pathname !== "/" && (
-        <Box w={{ base: "70px", md: "240px" }}>
+        <Box w={{ md: "240px" }}>
           <Sidebar />
         </Box>
       )}
 
       {/* The page content on the right */}
-      <Box flex={1} w={{ base: "calc(100% - 70px)", md: "calc(100% - 240px)" }}>
-        {children}
-      </Box>
+      <Box flex={1} w={"full"}>{children}</Box>
     </Flex>
   );
 };
