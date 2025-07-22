@@ -1,8 +1,10 @@
 import { Box } from "@chakra-ui/react";
 import { RouterLink } from "@/config/RouterLink";
 import { Avatar } from "@/components/ui/avatar";
+import { useUserStore } from "@/store/useUserStore";
 
 export const Profile = () => {
+  const { user } = useUserStore();
   return (
     <RouterLink
       display={"flex"}
@@ -14,7 +16,7 @@ export const Profile = () => {
       p={2}
       justifyContent={{ base: "center", md: "flex-start" }}
     >
-      <Avatar size={"sm"} src="/profilepic.png" />
+      <Avatar size={"sm"} name={user?.userName} />
       <Box display={{ base: "none", md: "block" }}>My Profile</Box>
     </RouterLink>
   );
