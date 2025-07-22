@@ -1,6 +1,7 @@
 import { RouterLink } from "@/config/RouterLink";
 import { Flex, Text } from "@chakra-ui/react";
 import { Avatar } from "../ui/avatar";
+import { getRelativeTime } from "@/utils/timeUtils";
 
 export const Caption = () => {
   return (
@@ -18,7 +19,7 @@ export const Caption = () => {
           <Text fontSize={14}>Feeling Good</Text>
         </Flex>
         <Text fontSize={12} color={"gray"}>
-          1d ago
+          {getRelativeTime("2024-07-20T08:15:00Z")}
         </Text>
       </Flex>
     </Flex>
