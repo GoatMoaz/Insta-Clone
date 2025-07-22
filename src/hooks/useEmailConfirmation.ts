@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import apiClient from "@/config/apiClient";
 import axios from "axios";
 
 interface UseEmailConfirmationResult {
@@ -26,13 +27,10 @@ export const useEmailConfirmation = (): UseEmailConfirmationResult => {
     setErrorMessage("");
 
     try {
-      const response = await axios.post(
-        "https://insta.runasp.net/api/Auth/confirm-email",
-        {
-          username,
-          code,
-        }
-      );
+      const response = await apiClient.post("/Auth/confirm-email", {
+        username,
+        code,
+      });
 
       if (response.status === 200) {
         setStatus("success");

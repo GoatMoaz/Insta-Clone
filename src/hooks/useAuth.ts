@@ -1,4 +1,6 @@
 import { useState } from "react";
+import apiClient from "@/config/apiClient";
+import { useUserStore, User } from "@/store/useUserStore";
 import axios from "axios";
 
 interface LoginData {
@@ -17,20 +19,20 @@ interface RegisterData {
 export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { login: setUser, logout, user } = useUserStore();
 
   const login = async (data: LoginData) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await axios.post(
-        "https://insta.runasp.net/api/Auth/login",
-        data
-      );
+      const response = await apiClient.post("/Auth/login", data);
       setIsLoading(false);
 
       const userData = response.data;
-      localStorage.setItem("user", JSON.stringify(userData));
+
+      // Save user to Zustand store (which will also persist to localStorage)
+      setUser(userData as User);
 
       return {
         success: true,
@@ -60,7 +62,7 @@ export const useAuth = () => {
     setError(null);
 
     try {
-      await axios.post("https://insta.runasp.net/api/Auth/register", data);
+      await apiClient.post("/Auth/register", data);
       setIsLoading(false);
       return {
         success: true,
@@ -90,9 +92,7 @@ export const useAuth = () => {
     setError(null);
 
     try {
-      await axios.post("https://insta.runasp.net/api/Auth/forget-password", {
-        email,
-      });
+      await apiClient.post("/Auth/forget-password", { email });
       setIsLoading(false);
       return {
         success: true,
@@ -128,7 +128,7 @@ export const useAuth = () => {
     setError(null);
 
     try {
-      await axios.post("https://insta.runasp.net/api/Auth/reset-password", {
+      await apiClient.post("/Auth/reset-password", {
         email,
         code,
         newPassword,
@@ -161,6 +161,58 @@ export const useAuth = () => {
     }
   };
 
+  const refreshToken = async () => {
+    if (!user?.refreshToken || !user?.token) {
+      logout();
+      return { success: false, message: "No refresh token available" };
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await apiClient.post("/Auth/refresh-token", {
+        token: user.token,
+        refreshToken: user.refreshToken,
+      });
+
+      const { token: newToken, refreshToken: newRefreshToken } = response.data;
+
+      // Update user store with new tokens
+      const updatedUser = {
+        ...user,
+        token: newToken,
+        refreshToken: newRefreshToken,
+      };
+
+      setUser(updatedUser);
+      setIsLoading(false);
+
+      return {
+        success: true,
+        message: "Token refreshed successfully",
+      };
+    } catch (err: unknown) {
+      setIsLoading(false);
+      let errorMessage = "Failed to refresh token";
+
+      if (axios.isAxiosError(err)) {
+        errorMessage =
+          err.response?.data?.errors?.[1] ||
+          err.response?.data?.errors?.NewPassword?.[0] ||
+          "An error occurred";
+      }
+
+      setError(errorMessage);
+      logout(); // Logout on refresh failure
+
+      return {
+        success: false,
+        message: errorMessage,
+      };
+    }
+  };
+
   return {
     login,
     register,
@@ -169,5 +221,6 @@ export const useAuth = () => {
     setError,
     forgetPassword,
     resetPassword,
+    refreshToken,
   };
 };
