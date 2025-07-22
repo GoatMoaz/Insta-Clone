@@ -6,21 +6,75 @@ import { ResetPasswordPage } from "@/pages/auth/ResetPasswordPage";
 import { ForgetPasswordPage } from "@/pages/auth/ForgetPasswordPage";
 import { ProfilePage } from "@/pages/profile/ProfilePage";
 import { PageLayout } from "./layouts/PageLayout";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { useTokenManager } from "@/hooks/useTokenManager";
 
 function App() {
+  // Initialize token manager for automatic token refresh
+  useTokenManager();
+
   return (
     <PageLayout>
       <Routes>
-        <Route path="/" element={<AuthPage />} />
-        <Route path="/home" element={<HomePage />} />
+        {/* Public routes - redirect to /home if authenticated */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute requireAuth={false}>
+              <AuthPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/auth/emailConfirmation"
-          element={<EmailConfirmationPage />}
+          element={
+            <ProtectedRoute requireAuth={false}>
+              <EmailConfirmationPage />
+            </ProtectedRoute>
+          }
         />
-        <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/auth/forgetPassword" element={<ForgetPasswordPage />} />
+        <Route
+          path="/auth/reset-password"
+          element={
+            <ProtectedRoute requireAuth={false}>
+              <ResetPasswordPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/auth/forgetPassword"
+          element={
+            <ProtectedRoute requireAuth={false}>
+              <ForgetPasswordPage />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/:username" element={<ProfilePage />} />
+        {/* Protected routes - require authentication */}
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/:username"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </PageLayout>
   );

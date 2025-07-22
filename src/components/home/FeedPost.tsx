@@ -1,23 +1,21 @@
-import { Box, Image } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 import { PostHeader } from "./PostHeader";
 import { PostFooter } from "./PostFooter";
+import { MediaCarousel } from "./MediaCarousel";
+import { Post } from "@/interfaces/Post";
 
-export const FeedPost = ({
-  username,
-  img,
-  avatar,
-}: {
-  username: string;
-  img: string;
-  avatar: string;
-}) => {
+export const FeedPost = ({ post }: { post: Post }) => {
   return (
     <>
-      <PostHeader username={username} avatar={avatar} />
+      <PostHeader
+        username={post.userName}
+        avatar={post.avatar}
+        time={post.time}
+      />
       <Box my={2} borderRadius={4} overflow={"hidden"}>
-        <Image src={img} alt={username} />
+        <MediaCarousel media={post.media} alt={post.userName} />
       </Box>
-      <PostFooter username={username} isProfilePage={false} />
+      <PostFooter isProfilePage={false} post={post} />
     </>
   );
 };

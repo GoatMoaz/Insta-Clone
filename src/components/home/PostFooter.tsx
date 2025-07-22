@@ -2,21 +2,23 @@ import { CommentLogo, NotificationsLogo, UnlikeLogo } from "@/assets/constants";
 import { Box, Flex, Input, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { BsBookmarkFill, BsBookmark } from "react-icons/bs";
+import { CommentsDialog } from "./CommentsDialog";
+import { Post } from "@/interfaces/Post";
 
 export const PostFooter = ({
-  username,
   isProfilePage,
+  post,
+  handleAddComment,
 }: {
-  username: string;
   isProfilePage: boolean;
+  post: Post;
+  handleAddComment?: (comment: string) => void;
 }) => {
   const [liked, setLiked] = useState(false);
-  const [likes, setLikes] = useState(1000);
   const [saved, isSaved] = useState(false);
 
   const taggleLikeHandler = () => {
     setLiked((prev) => !prev);
-    setLikes((prev) => (prev += liked ? -1 : 1));
   };
 
   return (
@@ -32,9 +34,11 @@ export const PostFooter = ({
             >
               {!liked ? <NotificationsLogo /> : <UnlikeLogo />}
             </Box>
-            <Box bg={"transparent"} cursor={"pointer"} fontSize={18}>
-              <CommentLogo />
-            </Box>
+            <CommentsDialog post={post}>
+              <Box bg={"transparent"} cursor={"pointer"} fontSize={18}>
+                <CommentLogo />
+              </Box>
+            </CommentsDialog>
           </Flex>
           <Box
             onClick={() => isSaved((prev) => !prev)}
@@ -47,20 +51,22 @@ export const PostFooter = ({
 
         <Flex direction={"column"}>
           <Text fontWeight={600} fontSize={"sm"}>
-            {likes} likes
+            {post.likes} likes
           </Text>
           {!isProfilePage && (
             <>
               <Text fontWeight={600} fontSize={"sm"}>
-                <Text as={"span"}>{username} </Text>
+                <Text as={"span"}>{post.userName} </Text>
                 <Text as={"span"} fontWeight={400}>
                   Feeling good
                 </Text>
               </Text>
 
-              <Text fontSize={"sm"} color={"gray"} cursor={"pointer"}>
-                View all 100 comments
-              </Text>
+              {!!post.comments && (
+                <Text fontSize={"sm"} color={"gray"} cursor={"pointer"}>
+                  View all {post.comments} comments
+                </Text>
+              )}
             </>
           )}
         </Flex>
@@ -69,6 +75,13 @@ export const PostFooter = ({
           variant={"flushed"}
           placeholder="Add a comment ..."
           fontSize={14}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && handleAddComment) {
+              const comment = (e.target as HTMLInputElement).value;
+              handleAddComment(comment);
+              (e.target as HTMLInputElement).value = "";
+            }
+          }}
         />
       </Flex>
     </>

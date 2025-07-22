@@ -1,12 +1,15 @@
 import { Box, Flex, Text } from "@chakra-ui/react";
 import { Avatar } from "@/components/ui/avatar";
+import { getRelativeTime } from "@/utils/timeUtils";
 
 export const PostHeader = ({
   username,
   avatar,
+  time,
 }: {
   username: string;
   avatar: string;
+  time: string;
 }) => {
   return (
     <Flex justify={"space-between"} align={"center"} w={"full"} my={2}>
@@ -14,7 +17,7 @@ export const PostHeader = ({
         <Avatar src={avatar} name={username} size={"sm"} />
         <Flex fontSize={12} fontWeight={"bold"} gap={2}>
           <Text>{username}</Text>
-          <Box color={"gray.500"}>• 1w</Box>
+          <Box color={"gray.500"}>• {getRelativeTime(time)}</Box>
         </Flex>
       </Flex>
       <Box cursor={"pointer"}>

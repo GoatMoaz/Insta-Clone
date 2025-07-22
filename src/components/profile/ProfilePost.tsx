@@ -24,6 +24,19 @@ import { Caption } from "./Caption";
 import { Comment } from "./Comment";
 
 export const ProfilePost = ({ img }: { img: string }) => {
+  // Create a mock post object for the PostFooter
+  const mockPost = {
+    postId: "profile-post-1",
+    userId: "user-1",
+    userName: "As a Programmer",
+    time: "2024-07-20T10:30:00Z",
+    media: [img],
+    likes: 7,
+    comments: 2,
+    avatar: "/profilepic.png",
+    caption: "Feeling good",
+  };
+
   return (
     <DialogRoot size={"xl"} placement={"center"}>
       <DialogTrigger asChild>
@@ -142,7 +155,7 @@ export const ProfilePost = ({ img }: { img: string }) => {
               </VStack>
               <Separator mt={"auto"} bg={"gray.8000"} />
 
-              <PostFooter username="As a Programmer" isProfilePage={true} />
+              <PostFooter isProfilePage={true} post={mockPost} />
             </Flex>
           </Flex>
         </DialogBody>
