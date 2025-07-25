@@ -9,13 +9,18 @@ export const FeedPost = ({ post }: { post: Post }) => {
     <>
       <PostHeader
         username={post.userName}
-        avatar={post.avatar}
+        avatar={post.profilePic}
         time={post.time}
       />
-      <Box my={2} borderRadius={4} overflow={"hidden"}>
+      <Box
+        my={2}
+        border={"1px solid"}
+        borderColor="#262626"
+        overflow={"hidden"}
+      >
         <MediaCarousel media={post.media} alt={post.userName} />
       </Box>
-      <PostFooter isProfilePage={false} post={post} />
+      <PostFooter isProfilePage={false} post={post} isModal={false} />
     </>
   );
 };

@@ -48,7 +48,8 @@ export const MediaCarousel = ({ media, alt }: MediaCarouselProps) => {
             w="full"
             h="full"
             borderRadius={4}
-            objectFit="cover"
+            objectFit="contain"
+            loading="lazy"
           />
         )}
 

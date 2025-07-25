@@ -8,7 +8,7 @@ export const PostHeader = ({
   time,
 }: {
   username: string;
-  avatar: string;
+  avatar?: string;
   time: string;
 }) => {
   return (

@@ -6,83 +6,70 @@ import {
   DialogRoot,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Box, Flex, VStack, Text, Separator, Image } from "@chakra-ui/react";
+import { Flex, VStack, Text, Image } from "@chakra-ui/react";
 import { Avatar } from "@/components/ui/avatar";
-import { useState } from "react";
 import { getRelativeTime } from "@/utils/timeUtils";
-import { Post } from "@/interfaces/Post";
+import { Post, Comment } from "@/interfaces/Post";
 import { PostFooter } from "./PostFooter";
-
-
-interface Comment {
-  id: string;
-  username: string;
-  avatar: string;
-  text: string;
-  time: string;
-  likes: number;
-  isLiked: boolean;
-}
+import { useState, useEffect } from "react";
+import { useUser } from "@/store/useUserStore";
 
 interface CommentsDialogProps {
   post: Post;
   children: React.ReactNode;
+  comments?: Comment[];
+  onAddComment?: (comment: string) => void;
 }
 
-export const CommentsDialog = ({ post, children }: CommentsDialogProps) => {
-  const [comments, setComments] = useState<Comment[]>([
-    {
-      id: "1",
-      username: "jane_doe",
-      avatar: "/img1.png",
-      text: "Amazing post! Love it 🔥",
-      time: "2024-07-20T10:30:00Z",
-      likes: 12,
-      isLiked: false,
-    },
-    {
-      id: "2",
-      username: "john_smith",
-      avatar: "/img2.png",
-      text: "This is so cool! How did you do this?",
-      time: "2024-07-20T09:15:00Z",
-      likes: 5,
-      isLiked: true,
-    },
-    {
-      id: "3",
-      username: "sarah_wilson",
-      avatar: "/img3.png",
-      text: "Incredible work! Keep it up 👏",
-      time: "2024-07-20T08:45:00Z",
-      likes: 8,
-      isLiked: false,
-    },
-  ]);
+export const CommentsDialog = ({
+  post,
+  children,
+  comments = [],
+  onAddComment,
+}: CommentsDialogProps) => {
+  const [localComments, setLocalComments] = useState<Comment[]>(comments);
+  const user = useUser();
 
-  const handleAddComment = (comment: string) => {
-    if (comment.trim()) {
-      const newCommentObj: Comment = {
-        id: Date.now().toString(),
-        username: "current_user", // Replace with actual username
-        avatar: "/current_user_avatar.png", // Replace with actual avatar
-        text: comment,
-        time: new Date().toISOString(),
-        likes: 0,
-        isLiked: false,
-      };
-      setComments((prev) => [...prev, newCommentObj]);
+  // Update local comments when props change
+  useEffect(() => {
+    setLocalComments(comments);
+  }, [comments]);
+
+  const handleAddComment = (commentText: string) => {
+    if (!commentText.trim() || !user) return;
+
+    // Create a temporary comment for immediate UI update
+    const tempComment: Comment = {
+      userId: user.id,
+      commentId: `temp-${Date.now()}`,
+      userName: user.userName,
+      profileImage: user.profilePic || "",
+      content: commentText,
+      time: new Date().toISOString(),
+      isReacted: false,
+      numberOfReactions: 0,
+      numberOfReplies: 0,
+    };
+
+    // Update local state immediately for optimistic UI
+    setLocalComments((prev) => [...prev, tempComment]);
+
+    // Call the parent's add comment handler
+    if (onAddComment) {
+      onAddComment(commentText);
     }
   };
 
   const handleLikeComment = (commentId: string) => {
-    setComments(
-      comments.map((comment) =>
-        comment.id === commentId
+    setLocalComments((prev) =>
+      prev.map((comment) =>
+        comment.commentId === commentId
           ? {
               ...comment,
-              isLiked: !comment.isLiked,
-              likes: comment.isLiked ? comment.likes - 1 : comment.likes + 1,
+              isReacted: !comment.isReacted,
+              numberOfReactions: comment.isReacted
+                ? comment.numberOfReactions - 1
+                : comment.numberOfReactions + 1,
             }
           : comment
       )
@@ -90,75 +77,86 @@ export const CommentsDialog = ({ post, children }: CommentsDialogProps) => {
   };
 
   return (
-    <DialogRoot size="xl" placement="center">
+    <DialogRoot size={"xl"} placement="center">
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogCloseTrigger />
         </DialogHeader>
         <DialogBody>
-          <Flex gap={4} h="500px">
-            {/* Post Image Section */}
-            <Box flex={1} display={{ base: "none", md: "block" }}>
-              <Box
-                h="full"
-                bg="black"
-                borderRadius={8}
-                overflow="hidden"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Image
-                  src={post.media[0]}
-                  alt={post.userName}
-                  maxH="full"
-                  maxW="full"
-                  objectFit="contain"
-                />
-              </Box>
-            </Box>
+          <Flex direction={{ base: "column", md: "row" }} gap={4}>
+            <Flex
+              display={{ base: "flex", md: "none" }}
+              bg={"black"}
+              w={"full"}
+              justify={"center"}
+            >
+              <Image src={post.media[0]} w={"320px"} />
+            </Flex>
+
+            <Image
+              src={post.media[0]}
+              w={"50%"}
+              display={{ base: "none", md: "block" }}
+            />
 
             {/* Comments Section */}
-            <VStack flex={1} align="stretch" h="full">
+            <VStack justifyContent={"space-between"} w={"full"}>
               {/* Comments List */}
               <VStack
-                flex={1}
                 overflowY="auto"
                 align="stretch"
+                _scrollbar={{
+                  display: "none",
+                }}
                 gap={3}
-                p={2}
-                maxH="300px"
+                p={3}
+                maxH={"300px"}
+                display={{ base: "none", sm: "flex" }}
+                w={"full"}
               >
-                {comments.map((comment) => (
-                  <Flex key={comment.id} gap={3}>
+                {localComments.map((comment) => (
+                  <Flex key={comment.commentId} gap={3}>
                     <Avatar
-                      src={comment.avatar}
-                      name={comment.username}
+                      src={comment.profileImage}
+                      name={comment.userName}
                       size="sm"
                     />
                     <VStack align="start" gap={1} flex={1}>
-                      <Flex gap={2} align="center" w="full">
-                        <Text fontWeight="bold" fontSize="sm">
-                          {comment.username}
-                        </Text>
-                        <Text fontSize="sm" flex={1}>
-                          {comment.text}
-                        </Text>
+                      <Flex
+                        gap={2}
+                        justify={"space-between"}
+                        align="flex-start"
+                        w="full"
+                      >
+                        <Flex gap={2} flex={1} minW={0}>
+                          <Text fontWeight="bold" fontSize="sm" flexShrink={0}>
+                            {comment.userName}
+                          </Text>
+                          <Text
+                            fontSize="sm"
+                            wordBreak="break-word"
+                            whiteSpace="pre-wrap"
+                            flex={1}
+                          >
+                            {comment.content}
+                          </Text>
+                        </Flex>
                         <Text
                           fontSize="xs"
-                          color={comment.isLiked ? "red.500" : "gray.500"}
+                          color={comment.isReacted ? "red.500" : "gray.500"}
                           cursor="pointer"
-                          onClick={() => handleLikeComment(comment.id)}
+                          onClick={() => handleLikeComment(comment.commentId)}
                           _hover={{ color: "red.300" }}
+                          flexShrink={0}
                         >
                           ♥
                         </Text>
                       </Flex>
                       <Flex gap={4} fontSize="xs" color="gray.500">
                         <Text>{getRelativeTime(comment.time)}</Text>
-                        {comment.likes > 0 && (
-                          <Text>{comment.likes} likes</Text>
+                        {comment.numberOfReactions > 0 && (
+                          <Text>{comment.numberOfReactions} likes</Text>
                         )}
                       </Flex>
                     </VStack>
@@ -166,13 +164,12 @@ export const CommentsDialog = ({ post, children }: CommentsDialogProps) => {
                 ))}
               </VStack>
 
-              <Separator />
-
               {/* Add Comment Section */}
               <PostFooter
                 isProfilePage={false}
                 post={post}
-                handleAddComment={handleAddComment}
+                isModal={true}
+                onAddComment={handleAddComment}
               />
             </VStack>
           </Flex>
