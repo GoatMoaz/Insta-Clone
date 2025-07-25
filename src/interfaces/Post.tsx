@@ -4,8 +4,21 @@ export interface Post {
   userName: string;
   time: string;
   media: string[];
-  likes: number;
-  comments: number;
-  avatar: string;
-  caption: string;
+  likesCount: number;
+  commentsCount: number;
+  content: string;
+  profilePic?: string;
+  isReacted: boolean;
+}
+
+export interface Comment {
+  userId: string;
+  commentId: string;
+  userName: string;
+  profileImage: string;
+  content: string;
+  time: string;
+  isReacted: boolean;
+  numberOfReactions: number;
+  numberOfReplies: number;
 }
