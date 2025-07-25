@@ -28,6 +28,7 @@ export const PostFooter = ({
     fetchCommentsForPost,
     comments,
     addCommentToPost,
+    isLoading,
   } = useFeed();
 
   const addLikeHandler = () => {
@@ -69,7 +70,7 @@ export const PostFooter = ({
             >
               {post.isReacted || liked ? <UnlikeLogo /> : <NotificationsLogo />}
             </Box>
-            <CommentsDialog post={post} comments={comments}>
+            <CommentsDialog post={post} comments={comments} isLoading={isLoading}>
               <Box
                 bg={"transparent"}
                 cursor={"pointer"}

@@ -106,9 +106,12 @@ export const useFeed = () => {
       }
 
       try {
+        setIsLoading(true);
         const response = await apiClient.get(`/Comment/${postId}`);
         setComments(response.data.comments || []);
+        setIsLoading(false);
       } catch (err: unknown) {
+        setIsLoading(false);
         let errorMessage = "An error occurred while fetching comments";
         if (axios.isAxiosError(err)) {
           errorMessage = err.response?.data?.message || err.message;
