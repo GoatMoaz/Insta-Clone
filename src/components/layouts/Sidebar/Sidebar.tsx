@@ -9,8 +9,8 @@ export const Sidebar = () => {
   return (
     <Box
       bg={"black"}
-      borderTop={{ base: "1px solid gray", md: "none" }}
-      borderRight={{ base: "none", md: "1px solid gray" }}
+      borderTop={{ base: "1px solid #262626", md: "none" }}
+      borderRight={{ base: "none", md: "1px solid #262626" }}
       py={8}
       px={{ base: 2, md: 4 }}
       zIndex={1000}
