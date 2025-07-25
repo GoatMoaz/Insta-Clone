@@ -19,23 +19,24 @@ import {
 import { Button } from "../ui/button";
 import { Avatar } from "../ui/avatar";
 import { MdDelete } from "react-icons/md";
-import { PostFooter } from "../home/PostFooter";
+// import { PostFooter } from "../home/PostFooter";
 import { Caption } from "./Caption";
 import { Comment } from "./Comment";
 
 export const ProfilePost = ({ img }: { img: string }) => {
   // Create a mock post object for the PostFooter
-  const mockPost = {
-    postId: "profile-post-1",
-    userId: "user-1",
-    userName: "As a Programmer",
-    time: "2024-07-20T10:30:00Z",
-    media: [img],
-    likes: 7,
-    comments: 2,
-    avatar: "/profilepic.png",
-    caption: "Feeling good",
-  };
+  // const mockPost = {
+  //   postId: "profile-post-1",
+  //   userId: "user-1",
+  //   userName: "As a Programmer",
+  //   time: "2024-07-20T10:30:00Z",
+  //   media: [img],
+  //   likesCount: 7,
+  //   commentsCount: 2,
+  //   profilePic: "/profilepic.png",
+  //   content: "Feeling good",
+  //   isReacted: false,
+  // };
 
   return (
     <DialogRoot size={"xl"} placement={"center"}>
@@ -155,7 +156,7 @@ export const ProfilePost = ({ img }: { img: string }) => {
               </VStack>
               <Separator mt={"auto"} bg={"gray.8000"} />
 
-              <PostFooter isProfilePage={true} post={mockPost} />
+              {/* <PostFooter isModal={false} isProfilePage={true} post={mockPost} /> */}
             </Flex>
           </Flex>
         </DialogBody>

@@ -11,7 +11,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { getRelativeTime } from "@/utils/timeUtils";
 import { Post, Comment } from "@/interfaces/Post";
 import { PostFooter } from "./PostFooter";
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useUser } from "@/store/useUserStore";
 
 interface CommentsDialogProps {
@@ -27,41 +27,48 @@ export const CommentsDialog = ({
   comments = [],
   onAddComment,
 }: CommentsDialogProps) => {
-  const [localComments, setLocalComments] = useState<Comment[]>(comments);
+  const [optimisticComments, setOptimisticComments] = useState<Comment[]>([]);
   const user = useUser();
 
-  // Update local comments when props change
-  useEffect(() => {
-    setLocalComments(comments);
-  }, [comments]);
+  // Combine server comments with optimistic comments, removing duplicates
+  const displayComments = [
+    ...comments,
+    ...optimisticComments.filter(
+      (optimistic) =>
+        !comments.some((server) => server.commentId === optimistic.commentId)
+    ),
+  ];
 
-  const handleAddComment = (commentText: string) => {
-    if (!commentText.trim() || !user) return;
+  const handleAddComment = useCallback(
+    (commentText: string) => {
+      if (!commentText.trim() || !user) return;
 
-    // Create a temporary comment for immediate UI update
-    const tempComment: Comment = {
-      userId: user.id,
-      commentId: `temp-${Date.now()}`,
-      userName: user.userName,
-      profileImage: user.profilePic || "",
-      content: commentText,
-      time: new Date().toISOString(),
-      isReacted: false,
-      numberOfReactions: 0,
-      numberOfReplies: 0,
-    };
+      // Create a temporary comment for immediate UI update
+      const tempComment: Comment = {
+        userId: user.id,
+        commentId: `temp-${Date.now()}`,
+        userName: user.userName,
+        profileImage: user.profilePic || "",
+        content: commentText,
+        time: new Date().toISOString(),
+        isReacted: false,
+        numberOfReactions: 0,
+        numberOfReplies: 0,
+      };
 
-    // Update local state immediately for optimistic UI
-    setLocalComments((prev) => [...prev, tempComment]);
+      // Add to optimistic comments for immediate UI update
+      setOptimisticComments((prev) => [...prev, tempComment]);
 
-    // Call the parent's add comment handler
-    if (onAddComment) {
-      onAddComment(commentText);
-    }
-  };
+      // Call the parent's add comment handler
+      if (onAddComment) {
+        onAddComment(commentText);
+      }
+    },
+    [user, onAddComment]
+  );
 
-  const handleLikeComment = (commentId: string) => {
-    setLocalComments((prev) =>
+  const handleLikeComment = useCallback((commentId: string) => {
+    setOptimisticComments((prev) =>
       prev.map((comment) =>
         comment.commentId === commentId
           ? {
@@ -74,10 +81,23 @@ export const CommentsDialog = ({
           : comment
       )
     );
-  };
+  }, []);
+
+  // Clear optimistic comments when dialog closes
+  const handleDialogClose = useCallback(() => {
+    setOptimisticComments([]);
+  }, []);
 
   return (
-    <DialogRoot size={"xl"} placement="center">
+    <DialogRoot
+      size={"xl"}
+      placement="center"
+      onOpenChange={(details) => {
+        if (!details.open) {
+          handleDialogClose();
+        }
+      }}
+    >
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -115,7 +135,7 @@ export const CommentsDialog = ({
                 display={{ base: "none", sm: "flex" }}
                 w={"full"}
               >
-                {localComments.map((comment) => (
+                {displayComments.map((comment) => (
                   <Flex key={comment.commentId} gap={3}>
                     <Avatar
                       src={comment.profileImage}
