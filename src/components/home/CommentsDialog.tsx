@@ -6,8 +6,7 @@ import {
   DialogRoot,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Spinner } from "@chakra-ui/react";
-import { Flex, VStack, Text, Image } from "@chakra-ui/react";
+import { Flex, VStack, Text, Image, Skeleton } from "@chakra-ui/react";
 import { Avatar } from "@/components/ui/avatar";
 import { getRelativeTime } from "@/utils/timeUtils";
 import { Post, Comment } from "@/interfaces/Post";
@@ -135,61 +134,83 @@ export const CommentsDialog = ({
                   }}
                   gap={3}
                   p={3}
-                  maxH={"300px"}
+                  h={"400px"}
                   display={{ base: "none", sm: "flex" }}
                   w={"full"}
                 >
-                  {displayComments.map((comment) => (
-                    <Flex key={comment.commentId} gap={3}>
-                      <Avatar
-                        src={comment.profileImage}
-                        name={comment.userName}
-                        size="sm"
-                      />
-                      <VStack align="start" gap={1} flex={1}>
-                        <Flex
-                          gap={2}
-                          justify={"space-between"}
-                          align="flex-start"
-                          w="full"
-                        >
-                          <Flex gap={2} flex={1} minW={0}>
+                  {displayComments.length === 0 ? (
+                    <Flex
+                      justify="center"
+                      align="center"
+                      minH="300px"
+                      direction="column"
+                      gap={2}
+                    >
+                      <Text fontSize="lg" color="gray.500">
+                        💬
+                      </Text>
+                      <Text fontSize="md" color="gray.500" fontWeight="medium">
+                        No comments yet
+                      </Text>
+                      <Text fontSize="sm" color="gray.400" textAlign="center">
+                        Be the first to comment on this post
+                      </Text>
+                    </Flex>
+                  ) : (
+                    displayComments.map((comment) => (
+                      <Flex key={comment.commentId} gap={3}>
+                        <Avatar
+                          src={comment.profileImage}
+                          name={comment.userName}
+                          size="sm"
+                        />
+                        <VStack align="start" gap={1} flex={1}>
+                          <Flex
+                            gap={2}
+                            justify={"space-between"}
+                            align="flex-start"
+                            w="full"
+                          >
+                            <Flex gap={2} flex={1} minW={0}>
+                              <Text
+                                fontWeight="bold"
+                                fontSize="sm"
+                                flexShrink={0}
+                              >
+                                {comment.userName}
+                              </Text>
+                              <Text
+                                fontSize="sm"
+                                wordBreak="break-word"
+                                whiteSpace="pre-wrap"
+                                flex={1}
+                              >
+                                {comment.content}
+                              </Text>
+                            </Flex>
                             <Text
-                              fontWeight="bold"
-                              fontSize="sm"
+                              fontSize="xs"
+                              color={comment.isReacted ? "red.500" : "gray.500"}
+                              cursor="pointer"
+                              onClick={() =>
+                                handleLikeComment(comment.commentId)
+                              }
+                              _hover={{ color: "red.300" }}
                               flexShrink={0}
                             >
-                              {comment.userName}
-                            </Text>
-                            <Text
-                              fontSize="sm"
-                              wordBreak="break-word"
-                              whiteSpace="pre-wrap"
-                              flex={1}
-                            >
-                              {comment.content}
+                              ♥
                             </Text>
                           </Flex>
-                          <Text
-                            fontSize="xs"
-                            color={comment.isReacted ? "red.500" : "gray.500"}
-                            cursor="pointer"
-                            onClick={() => handleLikeComment(comment.commentId)}
-                            _hover={{ color: "red.300" }}
-                            flexShrink={0}
-                          >
-                            ♥
-                          </Text>
-                        </Flex>
-                        <Flex gap={4} fontSize="xs" color="gray.500">
-                          <Text>{getRelativeTime(comment.time)}</Text>
-                          {comment.numberOfReactions > 0 && (
-                            <Text>{comment.numberOfReactions} likes</Text>
-                          )}
-                        </Flex>
-                      </VStack>
-                    </Flex>
-                  ))}
+                          <Flex gap={4} fontSize="xs" color="gray.500">
+                            <Text>{getRelativeTime(comment.time)}</Text>
+                            {comment.numberOfReactions > 0 && (
+                              <Text>{comment.numberOfReactions} likes</Text>
+                            )}
+                          </Flex>
+                        </VStack>
+                      </Flex>
+                    ))
+                  )}
                 </VStack>
 
                 {/* Add Comment Section */}
@@ -201,9 +222,26 @@ export const CommentsDialog = ({
                 />
               </VStack>
             ) : (
-              <VStack justifyContent={"center"} w={"full"} h={"full"}>
-                <Spinner size="xl" color="blue.500" />
-                <Text>Loading comments...</Text>
+              <VStack justify={"space-between"} align={"flex-start"} w={"full"}>
+                <VStack gap={4}>
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <Flex key={i}>
+                      <Skeleton rounded={"full"} height={10} width={10} />
+                      <VStack align="start" ml={4}>
+                        <Skeleton height={3} width={200} />
+                        <Skeleton height={3} width={150} />
+                      </VStack>
+                    </Flex>
+                  ))}
+                </VStack>
+                <VStack gap={4} w={"full"}>
+                  <Flex justify={"space-between"} w={"full"}>
+                    <Skeleton height={7} width={100} />
+                    <Skeleton height={7} width={50} />
+                  </Flex>
+                  <Skeleton height={10} width={"full"} />
+                  <Skeleton height={10} width={"full"} />
+                </VStack>
               </VStack>
             )}
           </Flex>

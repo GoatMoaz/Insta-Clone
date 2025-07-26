@@ -17,7 +17,7 @@ export const FeedPosts = ({
   hasMore?: boolean;
 }) => {
   return (
-    <Container maxW={"lg"} px={2} pb={20}>
+    <Container maxW={"xl"} px={2} pb={20}>
       {/* Initial loading skeleton */}
       {isLoading && posts.length === 0 &&
         [0, 1, 2, 3].map((_, i) => (
