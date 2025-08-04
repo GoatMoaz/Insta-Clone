@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useUserStore } from "@/store/useUserStore";
 import apiClient from "@/config/apiClient";
 import axios from "axios";
-import { Post, Comment } from "@/interfaces/Post";
+import { Post, Comment, Reply } from "@/interfaces/Post";
 
 export const useFeed = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -10,6 +10,7 @@ export const useFeed = () => {
   const [error, setError] = useState<string | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [comments, setComments] = useState<Comment[]>();
+  const [replies, setReplies] = useState<Reply[]>([]);
   const [hasMore, setHasMore] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const user = useUserStore((state) => state.user);
@@ -17,7 +18,9 @@ export const useFeed = () => {
 
   const fetchFeed = useCallback(
     async (pageNumber: number, isLoadMore = false) => {
-      if (!user) {
+      const currentUser = useUserStore.getState().user;
+
+      if (!currentUser) {
         setError("User not authenticated");
         return;
       }
@@ -34,16 +37,12 @@ export const useFeed = () => {
         const newPosts = response.data.items || [];
 
         if (isLoadMore) {
-          // Append new posts to existing ones
           setPosts((prevPosts) => [...prevPosts, ...newPosts]);
         } else {
-          // Replace posts (initial load)
           setPosts(newPosts);
         }
 
-        // Check if there are more posts to load
-        // Assuming your API returns hasMore or you can check if returned posts < expected page size
-        const hasMorePosts = newPosts.length > 0 && newPosts.length >= 10; // Adjust based on your page size
+        const hasMorePosts = newPosts.length > 0 && newPosts.length >= 10;
         setHasMore(hasMorePosts);
         setCurrentPage(pageNumber);
       } catch (err: unknown) {
@@ -60,7 +59,7 @@ export const useFeed = () => {
         setIsLoadingMore(false);
       }
     },
-    [user]
+    []
   );
 
   const loadMorePosts = useCallback(async () => {
@@ -108,10 +107,10 @@ export const useFeed = () => {
       try {
         setIsLoading(true);
         const response = await apiClient.get(`/Comment/${postId}`);
-        setComments(response.data.comments || []);
-        setIsLoading(false);
+
+        const comments = response.data.comments || [];
+        setComments(comments);
       } catch (err: unknown) {
-        setIsLoading(false);
         let errorMessage = "An error occurred while fetching comments";
         if (axios.isAxiosError(err)) {
           errorMessage = err.response?.data?.message || err.message;
@@ -119,23 +118,52 @@ export const useFeed = () => {
           errorMessage = err.message;
         }
         setError(errorMessage);
+      } finally {
+        setIsLoading(false);
       }
     },
     [user]
   );
 
   const addCommentToPost = useCallback(
-    async (postId: string, content: string) => {
+    async (postId: string, content: string, parentCommentId?: string) => {
       if (!user) {
         setError("User not authenticated");
         return;
       }
 
       try {
-        await apiClient.post(`/Comment`, {
+        const payload: {
+          postId: string;
+          content: string;
+          parentCommentId?: string;
+        } = {
           postId,
           content,
-        });
+        };
+
+        if (parentCommentId) {
+          payload.parentCommentId = parentCommentId;
+        }
+
+        const response = await apiClient.post(`/Comment`, payload);
+
+        if (parentCommentId) {
+          const replies = response.data.comments || [];
+          setReplies(replies);
+
+          return {
+            success: true,
+            replies: replies,
+            isReply: true,
+            parentCommentId,
+          };
+        } else {
+          const updatedComments = response.data.comments || [];
+          setComments(updatedComments);
+
+          return { success: true, comments: updatedComments, isReply: false };
+        }
       } catch (err: unknown) {
         let errorMessage = "An error occurred while adding a comment";
         if (axios.isAxiosError(err)) {
@@ -144,6 +172,41 @@ export const useFeed = () => {
           errorMessage = err.message;
         }
         setError(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+    },
+    [user]
+  );
+
+  const fetchRepliesForComment = useCallback(
+    async (commentId: string, postId: string) => {
+      if (!user) {
+        setError("User not authenticated");
+        return [];
+      }
+
+      try {
+        const response = await apiClient.get(
+          `/Comment/${postId}/comment/${commentId}`
+        );
+
+        const replies = response.data.items || [];
+        setReplies(replies);
+        return {
+          success: true,
+          replies: replies,
+          isReply: true,
+          parentCommentId: commentId,
+        };
+      } catch (err: unknown) {
+        let errorMessage = "An error occurred while fetching replies";
+        if (axios.isAxiosError(err)) {
+          errorMessage = err.response?.data?.message || err.message;
+        } else if (err instanceof Error) {
+          errorMessage = err.message;
+        }
+        setError(errorMessage);
+        return [];
       }
     },
     [user]
@@ -160,8 +223,10 @@ export const useFeed = () => {
     refreshFeed,
     addReactionToPost,
     fetchCommentsForPost,
+    fetchRepliesForComment,
     addCommentToPost,
     comments,
+    replies,
     posts,
     hasMore,
     currentPage,
