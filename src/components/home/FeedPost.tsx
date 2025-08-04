@@ -1,7 +1,7 @@
 import { Box } from "@chakra-ui/react";
-import { PostHeader } from "./PostHeader";
-import { PostFooter } from "./PostFooter";
-import { MediaCarousel } from "./MediaCarousel";
+import { PostHeader } from "@/components/post/PostHeader";
+import { PostFooter } from "@/components/post/PostFooter";
+import { MediaCarousel } from "@/components/post/MediaCarousel";
 import { Post } from "@/interfaces/Post";
 
 export const FeedPost = ({ post }: { post: Post }) => {
