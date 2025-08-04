@@ -22,3 +22,16 @@ export interface Comment {
   numberOfReactions: number;
   numberOfReplies: number;
 }
+
+export interface Reply {
+  commentId: string;
+  content: string;
+  postId: string;
+  parentCommentId: string;
+  userId: string;
+  userName: string;
+  userProfilePic: string;
+  isReacted: boolean;
+  time: string;
+  likesCount: number;
+}
