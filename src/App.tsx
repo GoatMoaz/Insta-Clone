@@ -7,12 +7,8 @@ import { ForgetPasswordPage } from "@/pages/auth/ForgetPasswordPage";
 import { ProfilePage } from "@/pages/profile/ProfilePage";
 import { PageLayout } from "./layouts/PageLayout";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { useTokenManager } from "@/hooks/useTokenManager";
 
 function App() {
-  // Initialize token manager for automatic token refresh
-  useTokenManager();
-
   return (
     <PageLayout>
       <Routes>
